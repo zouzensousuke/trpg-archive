@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>新規探索者登録</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <div class="container py-5">
+        <h2 class="mb-4" style="color: #deff9a; border-left: 4px solid #deff9a; padding-left: 15px;">新規探索者 登録アーカイブ</h2>
+        <div class="card bg-secondary text-light border-0 shadow">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">名前</label>
+                        <input type="text" name="name" class="form-control bg-dark text-light border-dark" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">職業</label>
+                            <input type="text" name="occupation" class="form-control bg-dark text-light border-dark">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">年齢</label>
+                            <input type="text" name="age" class="form-control bg-dark text-light border-dark">
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3" style="color: #deff9a;">基礎ステータス</h5>
+                    <div class="row g-2 mb-3">
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">STR</label><input type="number" name="str_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">CON</label><input type="number" name="con_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">POW</label><input type="number" name="pow_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">DEX</label><input type="number" name="dex_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">APP</label><input type="number" name="app_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">SIZ</label><input type="number" name="siz_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">INT</label><input type="number" name="int_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">EDU</label><input type="number" name="edu_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3" style="color: #deff9a;">派生ステータス</h5>
+                    <div class="row g-2 mb-4">
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">HP</label><input type="number" name="hp_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">MP</label><input type="number" name="mp_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">SAN</label><input type="number" name="san_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">アイデア</label><input type="number" name="idea_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">知識</label><input type="number" name="know_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-3 col-md-2"><label class="form-label fw-bold small">幸運</label><input type="number" name="luck_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                        <div class="col-6 col-md-3"><label class="form-label fw-bold small">ダメージボーナス(DB)</label><input type="text" name="db_val" class="form-control bg-dark text-light border-dark" value="0"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">背景・メモ・技能詳細</label>
+                        <textarea name="memo" class="form-control bg-dark text-light border-dark" rows="8"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn w-100 fw-bold" style="background-color: #deff9a; color: #000;">データベースへ登録</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRPG Character Archive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-5" style="color: #deff9a; font-weight: bold;">TRPG Explorer Archive</h1>
+        
+        <div class="text-end mb-4 d-flex justify-content-end gap-2">
+            <a href="/import" class="btn fw-bold btn-outline-light border-secondary">テキストから自動生成</a>
+            <a href="/create" class="btn fw-bold" style="background-color: #deff9a; color: #000;">＋ 新規探索者を登録</a>
+        </div>
+
+        <div class="row justify-content-center">
+            {% for inv in investigators %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card bg-secondary text-light border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold" style="color: #deff9a;">{{ inv.name }}</h5>
+                        <h6 class="card-subtitle mb-3 text-light opacity-75">
+                            {{ inv.occupation }} {% if inv.age %}/ {{ inv.age }}歳{% endif %}
+                        </h6>
+                        <div class="mb-3">
+                            <div class="d-flex flex-wrap gap-1 text-center small">
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">STR</div><div class="fw-bold">{{ inv.str_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">CON</div><div class="fw-bold">{{ inv.con_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">POW</div><div class="fw-bold">{{ inv.pow_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">DEX</div><div class="fw-bold">{{ inv.dex_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">APP</div><div class="fw-bold">{{ inv.app_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">SIZ</div><div class="fw-bold">{{ inv.siz_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">INT</div><div class="fw-bold">{{ inv.int_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">EDU</div><div class="fw-bold">{{ inv.edu_val }}</div></div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 text-center small mt-1">
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #ff9999; font-size: 0.65rem;">HP</div><div class="fw-bold">{{ inv.hp_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #99ccff; font-size: 0.65rem;">MP</div><div class="fw-bold">{{ inv.mp_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">SAN</div><div class="fw-bold">{{ inv.san_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">ｱｲﾃﾞｱ</div><div class="fw-bold">{{ inv.idea_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">知識</div><div class="fw-bold">{{ inv.know_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">幸運</div><div class="fw-bold">{{ inv.luck_val }}</div></div>
+                                <div class="bg-dark border border-secondary rounded p-1" style="min-width: 48px;"><div style="color: #deff9a; font-size: 0.65rem;">DB</div><div class="fw-bold">{{ inv.db_val }}</div></div>
+                            </div>
+                        </div>
+                        <p class="card-text text-truncate" style="max-height: 4.5em; overflow: hidden;">
+                            {{ inv.memo }}
+                        </p>
+                        
+                        <form action="/delete/{{ inv.id }}" method="POST" class="mt-auto pt-3 border-top border-secondary" onsubmit="return confirm('本当にこの探索者のデータを削除しますか？');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger w-100 fw-bold">データを削除</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center text-muted mt-5">
+                <p>まだ探索者が登録されていません。「＋ 新規探索者を登録」から追加してください。</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
