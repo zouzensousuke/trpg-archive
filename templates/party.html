@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>KPダッシュボード - パーティー管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .stylish-heading {
+            color: #deff9a;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 0.3rem 0.8rem;
+            border-left: 4px solid #deff9a;
+            background: linear-gradient(90deg, rgba(222,255,154,0.1) 0%, rgba(33,37,41,0) 100%);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #444;
+        }
+        .mini-portrait {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: top;
+            border: 2px solid #555;
+        }
+        .skill-scroll::-webkit-scrollbar { width: 6px; }
+        .skill-scroll::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+        /* アコーディオンのダークテーマ調整 */
+        .accordion-button { background-color: #2b3035; color: #deff9a; font-weight: bold; box-shadow: none !important; }
+        .accordion-button:not(.collapsed) { background-color: #343a40; color: #deff9a; }
+        .accordion-button::after { filter: invert(1) grayscale(100%) brightness(200%); }
+        .accordion-item { border: 1px solid #444; background-color: #212529; color: #f8f9fa; }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid py-4 px-4">
+        
+        <!-- ヘッダーエリア -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="/" class="btn btn-sm btn-outline-light me-3">← トップへ戻る</a>
+                <span class="fs-4 fw-bold" style="color: #deff9a;">KP Dashboard</span>
+            </div>
+        </div>
+
+        <!-- 狂淵卓ハウスルール（アコーディオン） -->
+        <div class="accordion mb-4 shadow" id="houseRuleAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        狂淵卓 KP用ハウスルール・クイックリファレンス
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#houseRuleAccordion">
+                    <div class="accordion-body small" style="line-height: 1.6;">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <h6 class="fw-bold" style="color: #ff9999;">【成長判定】</h6>
+                                <ul class="mb-0 ps-3">
+                                    <li><strong>対象:</strong> クリティカル(1-5)、ファンブル(96-100)、初期値成功(即時)</li>
+                                    <li><strong>処理:</strong> 初期値のみ、もう一度判定し<strong>「失敗」で1d10成長</strong>（重複不可）</li>
+                                </ul>
+                                <h6 class="fw-bold mt-3" style="color: #ff9999;">【戦闘特殊処理】</h6>
+                                <ul class="mb-0 ps-3">
+                                    <li><strong>クリティカル:</strong> 必中＆最大ダメ / 部位破壊・無力化(1Rスタンor武装解除) / 連続行動</li>
+                                    <li><strong>スペシャル:</strong> 装甲貫通 / 次手番回避+20% / ダメージ2回振り高い方<br><span class="text-muted">※鋭利な武器はさらに基本武器ダメ最大値を追加</span></li>
+                                    <li><strong>ファンブル:</strong> 自爆・誤射 / 無防備(次R回避不可) / SAN値直葬（GM采配）</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 border-start border-secondary">
+                                <h6 class="fw-bold" style="color: #deff9a;">【回避・行動・回復】</h6>
+                                <ul class="mb-0 ps-3">
+                                    <li><strong>行動順:</strong> DEX順。同値は1d100低い方＞PC優先。</li>
+                                    <li><strong>回避:</strong> R開始前宣言で+10%。1R3回まで（1回目:等倍, 2回目:2/3, 3回目:1/3）</li>
+                                    <li><strong>意識不明:</strong> 一撃で最大HPの1/2以上＆CONx5失敗 / HP1〜2 / MP0</li>
+                                    <li><strong>回復:</strong> 応急手当(1d3) ＋ 医学(1d3/時間必要) ※ファンブルで1d3ダメージ</li>
+                                    <li><strong>死亡:</strong> HP0以下で次R終了時死亡 / HP-3以下で即死</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 border-start border-secondary">
+                                <h6 class="fw-bold" style="color: #99ccff;">【狂気・特殊ルール】</h6>
+                                <ul class="mb-0 ps-3">
+                                    <li><strong>一時的狂気:</strong> 一度に5以上減少 ＋ アイデア成功</li>
+                                    <li><strong>不定の狂気:</strong> 1日で現在SANの1/5以上減少 (1d6ヶ月)</li>
+                                </ul>
+                                <div class="mt-3 p-2 bg-dark border border-warning rounded">
+                                    <h6 class="fw-bold text-warning mb-1">【狂淵卓 独自バフ】</h6>
+                                    <strong>GMの性癖に刺さった場合、判定に【＋20％】の補正</strong>を与える。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 手打ち対抗ロール(RESB)ジェネレーター -->
+        <div class="card bg-secondary border-0 shadow p-3 mb-4 d-flex flex-column flex-md-row align-items-md-center gap-2" style="max-width: 500px;">
+            <span class="small fw-bold text-nowrap" style="color: #ff9999;">対抗(RESB)</span>
+            <input type="number" id="res-act" class="form-control form-control-sm bg-dark text-light border-secondary text-center" placeholder="能動値" style="width: 70px;">
+            <span class="text-muted small">VS</span>
+            <input type="number" id="res-pas" class="form-control form-control-sm bg-dark text-light border-secondary text-center" placeholder="受動値" style="width: 70px;">
+            <button onclick="generateSingleRes()" class="btn btn-sm text-nowrap" style="background-color: #ff9999; color: #000; font-weight: bold;">生成</button>
+            
+            <div class="input-group input-group-sm flex-grow-1">
+                <input type="text" id="res-output" class="form-control bg-dark text-warning border-secondary" readonly placeholder="RESB(能動-受動)">
+                <button onclick="copyRes()" class="btn btn-outline-light">コピー</button>
+            </div>
+        </div>
+
+        <!-- 探索者カードの一覧 -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+            {% for data in party_data %}
+            <div class="col">
+                <div class="card bg-secondary text-light border-0 shadow h-100 d-flex flex-column">
+                    
+                    <!-- 上部：名前とステータス -->
+                    <div class="p-3 border-bottom border-dark">
+                        <div class="fw-bold fs-5 text-truncate mb-2" style="color: #deff9a;">{{ data.inv.name }}</div>
+                        
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="badge bg-dark border border-secondary d-flex align-items-center gap-1" style="font-size: 0.85rem;">
+                                HP <input type="number" class="stat-update bg-transparent text-light border-0 p-0 text-center fw-bold" style="width: 35px; outline: none;" data-inv="{{ data.inv.id }}" data-type="hp" value="{{ data.inv.hp_val }}">
+                            </div>
+                            <div class="badge bg-dark border border-secondary d-flex align-items-center gap-1" style="font-size: 0.85rem;">
+                                MP <input type="number" class="stat-update bg-transparent text-light border-0 p-0 text-center fw-bold" style="width: 35px; outline: none;" data-inv="{{ data.inv.id }}" data-type="mp" value="{{ data.inv.mp_val }}">
+                            </div>
+                            <div class="badge d-flex align-items-center gap-1" style="background-color: #deff9a; color: #000; font-size: 0.85rem;">
+                                SAN <input type="number" class="stat-update bg-transparent border-0 p-0 text-center fw-bold" style="width: 35px; outline: none; color: #000;" data-inv="{{ data.inv.id }}" data-type="san" value="{{ data.inv.san_val }}"> / {{ data.max_san }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 中部：主要ステータス -->
+                    <div class="p-3 bg-dark">
+                        <div class="row row-cols-8 g-0 text-center small mb-2 border-bottom border-secondary pb-2">
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">STR</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.str_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">CON</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.con_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">POW</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.pow_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">DEX</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.dex_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">APP</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.app_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">SIZ</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.siz_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">INT</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.int_val }}</div></div>
+                            <div class="col"><div style="color: #ccc; font-size: 0.75rem;">EDU</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.edu_val }}</div></div>
+                        </div>
+                        
+                        <div class="row row-cols-4 g-0 text-center small pt-1">
+                            <div class="col"><div style="color: #deff9a; font-size: 0.75rem;">アイデア</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.idea_val }}</div></div>
+                            <div class="col"><div style="color: #deff9a; font-size: 0.75rem;">知識</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.know_val }}</div></div>
+                            <div class="col"><div style="color: #deff9a; font-size: 0.75rem;">幸運</div><div class="fw-bold" style="color: #ffffff;">{{ data.inv.luck_val }}</div></div>
+                            <div class="col"><div style="color: #deff9a; font-size: 0.75rem;">DB</div><div class="fw-bold" style="color: #ff9999;">{{ data.inv.db_val }}</div></div>
+                        </div>
+                    </div>
+
+                    <!-- 下部：習得技能一覧 -->
+                    <div class="p-3 flex-grow-1 d-flex flex-column">
+                        <div class="stylish-heading">取得技能 & 成長チェック</div>
+                        <div class="skill-scroll" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                            
+                            {% for group_name, skills in data.grouped_skills.items() %}
+                            {% if group_name == '戦闘技能' %}
+                            <div class="small fw-bold mt-2 mb-1" style="color: #ff9999; border-bottom: 1px dashed #555;">【{{ group_name }}】</div>
+                            {% else %}
+                            <div class="small fw-bold mt-2 mb-1" style="color: #daffde; border-bottom: 1px dashed #555;">【{{ group_name }}】</div>
+                            {% endif %}
+                            
+                            <div class="row g-1 m-0">
+                                {% for name, val in skills.items() %}
+                                <div class="col-6 p-1">
+                                    <div class="bg-dark rounded p-1 d-flex align-items-center justify-content-between border border-secondary">
+                                        <div class="d-flex align-items-center gap-1 overflow-hidden">
+                                            <input type="checkbox" class="form-check-input growth-check m-0 flex-shrink-0" 
+                                                   data-inv="{{ data.inv.id }}" data-skill="{{ name }}" 
+                                                   style="width: 14px; height: 14px; cursor: pointer;">
+                                            <span class="small text-truncate" style="font-size: 0.75rem;" title="{{ name }}">{{ name }}</span>
+                                        </div>
+                                        <span class="badge px-1" style="background-color: #555; font-size: 0.75rem; color: #fff;">{{ val }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function generateSingleRes() {
+            const act = document.getElementById('res-act').value;
+            const pas = document.getElementById('res-pas').value;
+            if (!act || !pas) return;
+            const outBox = document.getElementById('res-output');
+            outBox.value = `RESB(${act}-${pas})`;
+        }
+
+        function copyRes() {
+            const outBox = document.getElementById('res-output');
+            if (!outBox.value) return;
+            outBox.select();
+            document.execCommand('copy');
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "コピー完了!";
+            btn.classList.add('btn-success');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('btn-success');
+            }, 1500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.growth-check').forEach(cb => {
+                let key = `growth_${cb.dataset.inv}_${cb.dataset.skill}`;
+                if (localStorage.getItem(key) === '1') {
+                    cb.checked = true;
+                }
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        localStorage.setItem(key, '1');
+                    } else {
+                        localStorage.removeItem(key);
+                    }
+                });
+            });
+        });
+
+        // --- ステータスリアルタイム更新（AJAX） ---
+        document.querySelectorAll('.stat-update').forEach(input => {
+            input.addEventListener('change', function() {
+                const invId = this.dataset.inv;
+                const statType = this.dataset.type;
+                const newVal = this.value;
+                
+                // 裏側でこっそり app.py にデータを送りつける
+                fetch(`/api/update_stat/${invId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ [statType]: newVal })
+                }).then(response => {
+                    if(response.ok) {
+                        // 保存成功の合図として、一瞬だけバッジを赤く光らせる
+                        this.parentElement.style.transition = "background-color 0.3s";
+                        const oldBg = this.parentElement.style.backgroundColor;
+                        this.parentElement.style.backgroundColor = "#ff9999";
+                        setTimeout(() => {
+                            this.parentElement.style.backgroundColor = oldBg;
+                            if (!oldBg) this.parentElement.style.backgroundColor = '';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>

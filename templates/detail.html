@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ inv.name }} - 探索者詳細</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .stylish-heading {
+            color: #deff9a;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-left: 5px solid #deff9a;
+            border-bottom: 1px solid #444;
+            background: linear-gradient(90deg, rgba(222,255,154,0.1) 0%, rgba(33,37,41,0) 100%);
+            margin-bottom: 1.5rem;
+        }
+        .portrait-box {
+            width: 100%;
+            height: 350px;
+            background-color: #212529;
+            border: 1px solid #444;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portrait-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+    <style>
+        .stylish-heading {
+            color: #deff9a;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-left: 5px solid #deff9a;
+            border-bottom: 1px solid #444;
+            background: linear-gradient(90deg, rgba(222,255,154,0.1) 0%, rgba(33,37,41,0) 100%);
+            margin-bottom: 1.5rem;
+        }
+        .portrait-box {
+            width: 100%;
+            height: 280px; /* ← 350pxから280pxに縮小して、右側の高さに合わせた！ */
+            background-color: #212529;
+            border: 1px solid #444;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portrait-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="container py-5">
+        <div class="mb-4 d-flex justify-content-between">
+            <a href="/" class="btn btn-sm btn-outline-light">← アーカイブ一覧に戻る</a>
+            
+            <div>
+                <a href="/edit/{{ inv.id }}" class="btn btn-sm fw-bold" style="background-color: #deff9a; color: #000;">このデータを編集する</a>
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">削除</button>
+            </div>
+        </div>
+
+        <!-- 上段：立ち絵と基本ステータス（mb-5にして下の技能と大きく離す） -->
+        <div class="row g-4 mb-5">
+            <!-- 左カラム：立ち絵とボタンのみ -->
+            <div class="col-md-4">
+                <div class="card bg-secondary text-light border-0 shadow p-4 text-center h-100">
+                    <h3 class="fw-bold mb-3" style="color: #deff9a;">{{ inv.name }}</h3>
+                    
+                    <div class="portrait-box mx-auto" style="margin-bottom: 1rem;">
+                        {% if inv.image_normal or inv.image_smile or inv.image_insane %}
+                            <img id="main-portrait" src="{{ inv.image_normal or inv.image_smile or inv.image_insane }}" alt="立ち絵">
+                        {% else %}
+                            <span class="text-muted small">NO IMAGE<br>（編集からURLを登録）</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-center gap-2">
+                        {% if inv.image_normal %}
+                        <button onclick="document.getElementById('main-portrait').src='{{ inv.image_normal }}'" class="btn btn-sm btn-outline-light">通常</button>
+                        {% endif %}
+                        {% if inv.image_smile %}
+                        <button onclick="document.getElementById('main-portrait').src='{{ inv.image_smile }}'" class="btn btn-sm btn-outline-warning">笑顔</button>
+                        {% endif %}
+                        {% if inv.image_insane %}
+                        <button onclick="document.getElementById('main-portrait').src='{{ inv.image_insane }}'" class="btn btn-sm btn-outline-danger">狂気</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div> 
+
+            <!-- 右カラム：プロフ、能力値（d-flex flex-columnで高さを自動追従させる） -->
+            <div class="col-md-8 d-flex flex-column">
+                <!-- 1. キャラクタープロフィール（余白をp-3に縮小） -->
+                <div class="card bg-secondary text-light border-0 shadow p-3 mb-3">
+                    <div class="stylish-heading mb-3">キャラクタープロフィール</div>
+                    <div class="row align-items-center">
+                        <div class="col-md-5 mb-2">
+                            <div class="text-muted" style="font-size: 0.8rem;">職業 / 所属</div>
+                            <div class="fs-6 fw-bold text-light">{{ inv.occupation }}</div>
+                        </div>
+                        <div class="col-md-3 mb-2 border-start border-secondary ps-3">
+                            <div class="text-muted" style="font-size: 0.8rem;">年齢</div>
+                            <div class="fs-6 fw-bold text-light">{{ inv.age }}歳</div>
+                        </div>
+                        <div class="col-md-4 mb-2 border-start border-secondary ps-3">
+                            <div class="text-muted" style="font-size: 0.8rem;">精神状態 (狂気)</div>
+                            <!-- 「正常」なら薄緑、それ以外なら赤文字になる -->
+                            <div class="fs-6 fw-bold" style="color: {% if inv.insanity_state == '正常' %}#daffde{% else %}#ff9999{% endif %};">
+                                {{ inv.insanity_state }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 能力値 & パラメータ（flex-grow-1で左の高さにピタッと合わせる） -->
+                <div class="card bg-secondary text-light border-0 shadow p-3 flex-grow-1 d-flex flex-column justify-content-center">
+                    <div class="stylish-heading mb-3">能力値 & パラメータ</div>
+                    
+                    <!-- パラメータの箱を py-1 px-2 にしてギュッと小さくした -->
+                    <div class="d-flex flex-wrap gap-2 text-center">
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">STR</div><div class="fs-6 fw-bold">{{ inv.str_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">CON</div><div class="fs-6 fw-bold">{{ inv.con_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">POW</div><div class="fs-6 fw-bold">{{ inv.pow_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">DEX</div><div class="fs-6 fw-bold">{{ inv.dex_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">APP</div><div class="fs-6 fw-bold">{{ inv.app_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">SIZ</div><div class="fs-6 fw-bold">{{ inv.siz_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">INT</div><div class="fs-6 fw-bold">{{ inv.int_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">EDU</div><div class="fs-6 fw-bold">{{ inv.edu_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #ff9999; font-size: 0.7rem;">HP</div><div class="fs-6 fw-bold">{{ inv.hp_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #99ccff; font-size: 0.7rem;">MP</div><div class="fs-6 fw-bold">{{ inv.mp_val }}</div></div>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap gap-2 text-center mt-2">
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">SAN</div><div class="fs-6 fw-bold">{{ inv.san_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">アイデア</div><div class="fs-6 fw-bold">{{ inv.idea_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">知識</div><div class="fs-6 fw-bold">{{ inv.know_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 50px;"><div style="color: #deff9a; font-size: 0.7rem;">幸運</div><div class="fs-6 fw-bold">{{ inv.luck_val }}</div></div>
+                        <div class="bg-dark border border-secondary rounded py-1 px-2" style="min-width: 70px;"><div style="color: #deff9a; font-size: 0.7rem;">DB</div><div class="fs-6 fw-bold">{{ inv.db_val }}</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- 下段：習得技能と背景・メモ -->
+        <div class="card bg-secondary text-light border-0 shadow p-4 mb-4">
+            <div class="stylish-heading">習得技能</div>
+            
+            <h6 class="fw-bold mb-3" style="color: #daffde;">一般技能</h6>
+            <div class="row g-2 mb-4">
+                {% for name, val in general_skills.items() %}
+                {% set is_base = val <= base_skills.get(name, 0) %}
+                <div class="col-6 col-sm-4 col-lg-2">
+                    <div class="p-2 bg-dark rounded d-flex justify-content-between align-items-center border border-secondary h-100" style="opacity: {{ '0.5' if is_base else '1' }};">
+                        <span class="small text-truncate me-1" style="color: {{ '#888' if is_base else '#fff' }};">{{ name }}</span>
+                        <span class="badge" style="background-color: {{ '#444' if is_base else '#deff9a' }}; color: {{ '#aaa' if is_base else '#000' }};">{{ val }}%</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-muted small">一般技能がありません。</div>
+                {% endfor %}
+            </div>
+
+            <h6 class="fw-bold mb-3" style="color: #ff9999;">戦闘技能</h6>
+            <div class="row g-2">
+                {% for name, val in combat_skills.items() %}
+                {% set is_base = val <= base_skills.get(name, 0) %}
+                <div class="col-6 col-sm-4 col-lg-2">
+                    <div class="p-2 bg-dark rounded d-flex justify-content-between align-items-center border border-secondary h-100" style="opacity: {{ '0.5' if is_base else '1' }};">
+                        <span class="small text-truncate me-1" style="color: {{ '#888' if is_base else '#fff' }};">{{ name }}</span>
+                        <span class="badge" style="background-color: {{ '#444' if is_base else '#ff9999' }}; color: {{ '#aaa' if is_base else '#000' }};">{{ val }}%</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-muted small">戦闘技能がありません。</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card bg-secondary text-light border-0 shadow p-4 mt-4">
+            <div class="stylish-heading">背景・メモ・全データログ</div>
+            <div class="p-3 bg-dark rounded border border-secondary" style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem; max-height: 500px; overflow-y: auto; color: #daffde;">{{ inv.memo }}</div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-danger text-light shadow-lg">
+                <div class="modal-header border-bottom border-danger">
+                    <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">⚠️ 探索者ロスト確認</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    本当に <span class="fw-bold text-warning">{{ inv.name }}</span> のデータを削除しますか？<br><br>
+                    <span class="small text-muted">※この操作は取り消せません。</span>
+                </div>
+                <div class="modal-footer border-top border-danger">
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">キャンセル</button>
+                    <form action="/delete/{{ inv.id }}" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-danger fw-bold">ロストさせる</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
