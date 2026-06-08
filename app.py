@@ -126,10 +126,12 @@ def import_text():
         name_match = re.search(r'^(.+?)\s*\(', raw_text)
         name = name_match.group(1).strip() if name_match else "名無し"
         
-        age_match = re.search(r'\((\d+)歳\)', raw_text)
+        # 【修正】カッコの位置に関わらず「数字＋歳」を確実に抜く
+        age_match = re.search(r'(\d+)\s*歳', raw_text)
         age = age_match.group(1) if age_match else ""
 
-        occ_match = re.search(r'所属：([^\n]+)', raw_text)
+        # 【修正】「職業：」でも「所属：」でも両方対応できるように強化
+        occ_match = re.search(r'(?:職業|所属)[:：]\s*([^\n]+)', raw_text)
         occupation = occ_match.group(1).replace(' 男', '').replace(' 女', '').strip() if occ_match else ""
 
         # 基礎ステータス
@@ -163,10 +165,8 @@ def import_text():
             elif 25 <= str_siz <= 32: db_val = "+1D4"
             elif 33 <= str_siz <= 40: db_val = "+1D6"
 
-        # --- みくのリストを基にした全技能の初期値セット ---
         skills_dict = get_base_skills(dex_val, edu_val)
 
-        # キャラエノのテキストから取得できたスキルで、初期値を「上書き」する
         skills_block_match = re.search(r'【技能】\s*\n(.*?)(?=-{5,})', raw_text, re.DOTALL)
         if skills_block_match:
             skills_text = skills_block_match.group(1)
@@ -175,11 +175,10 @@ def import_text():
                 if skill_match:
                     s_name = skill_match.group(1).strip()
                     s_val = int(skill_match.group(2))
-                    skills_dict[s_name] = s_val  # ここで上書き＆新規追加
+                    skills_dict[s_name] = s_val
 
         skills_json_str = json.dumps(skills_dict, ensure_ascii=False)
 
-        # メモ欄のノイズカット（【武器】以降だけを綺麗に切り出す）
         memo_match = re.search(r'(【武器】.*)', raw_text, re.DOTALL)
         clean_memo = memo_match.group(1) if memo_match else raw_text
 
@@ -197,6 +196,68 @@ def import_text():
         return redirect(url_for('index'))
     else:
         return render_template('import.html')
+
+# 🚀 【新規追加】既存キャラのデータを最新テキストで一括上書きするルート
+@app.route('/reimport/<int:id>', methods=['POST'])
+def reimport(id):
+    inv = Investigator.query.get_or_404(id)
+    raw_text = request.form['raw_text']
+    
+    def get_stat(stat_name, default=0):
+        match = re.search(fr'{stat_name}[:：]\s*(\d+)', raw_text)
+        return int(match.group(1)) if match else default
+
+    name_match = re.search(r'^(.+?)\s*\(', raw_text)
+    if name_match:
+        inv.name = name_match.group(1).strip()
+        
+    age_match = re.search(r'(\d+)\s*歳', raw_text)
+    if age_match:
+        inv.age = age_match.group(1)
+
+    occ_match = re.search(r'(?:職業|所属)[:：]\s*([^\n]+)', raw_text)
+    if occ_match:
+        inv.occupation = occ_match.group(1).replace(' 男', '').replace(' 女', '').strip()
+
+    inv.str_val = get_stat('STR', inv.str_val)
+    inv.con_val = get_stat('CON', inv.con_val)
+    inv.pow_val = get_stat('POW', inv.pow_val)
+    inv.dex_val = get_stat('DEX', inv.dex_val)
+    inv.app_val = get_stat('APP', inv.app_val)
+    inv.siz_val = get_stat('SIZ', inv.siz_val)
+    inv.int_val = get_stat('INT', inv.int_val)
+    inv.edu_val = get_stat('EDU', inv.edu_val)
+
+    inv.hp_val = get_stat('耐久力', default=math.ceil((inv.con_val + inv.siz_val) / 2))
+    inv.mp_val = get_stat('マジック・ポイント', default=inv.pow_val)
+    inv.san_val = get_stat('正気度', default=inv.pow_val * 5)
+    inv.idea_val = get_stat('アイデア', default=inv.int_val * 5)
+    inv.know_val = get_stat('知識', default=inv.edu_val * 5)
+    inv.luck_val = get_stat('幸運', default=inv.pow_val * 5)
+
+    db_match = re.search(r'ダメージ・ボーナス[:：]\s*([+-]?\w+)', raw_text)
+    if db_match:
+        inv.db_val = db_match.group(1)
+
+    skills_dict = get_base_skills(inv.dex_val, inv.edu_val)
+    skills_block_match = re.search(r'【技能】\s*\n(.*?)(?=-{5,})', raw_text, re.DOTALL)
+    if skills_block_match:
+        skills_text = skills_block_match.group(1)
+        for line in skills_text.split('\n'):
+            skill_match = re.search(r'(.*?)[:：]\s*(\d+)%', line)
+            if skill_match:
+                s_name = skill_match.group(1).strip()
+                s_val = int(skill_match.group(2))
+                skills_dict[s_name] = s_val
+
+    inv.skills_json = json.dumps(skills_dict, ensure_ascii=False)
+
+    memo_match = re.search(r'(【武器】.*)', raw_text, re.DOTALL)
+    if memo_match:
+        inv.memo = memo_match.group(1)
+
+    db.session.commit()
+    return redirect(url_for('detail', id=inv.id))
 
  # 画面側で「これは初期値か？」を判定できるように、基礎技能の値も渡してあるとこ
 @app.route('/investigator/<int:id>')
@@ -323,6 +384,31 @@ def party():
         cthulhu = all_skills.get('クトゥルフ神話', 0)
         max_san = 99 - cthulhu
         
+        # KPダッシュボード専用の「戦闘メモ」を生成する
+        combat_memo = ""
+        if inv.memo:
+            # 「【」を含めず、単語の一部が引っかかればOKにする
+            keep_keywords = ['武器', '所持品', '装備', 'アーティファクト', '呪文', '魔道書']
+            filtered_lines = []
+            is_keeping = False
+            
+            for line in inv.memo.split('\n'):
+                stripped_line = line.strip()
+                # 「【」で始まる見出し行が来たら、残す項目か判定する
+                if stripped_line.startswith('【') and '】' in stripped_line:
+                    if any(k in stripped_line for k in keep_keywords):
+                        is_keeping = True
+                    else:
+                        is_keeping = False  # 履歴や設定が来たらシャットアウト
+                
+                # 残すモードの時だけテキストを拾う
+                if is_keeping and stripped_line:
+                    filtered_lines.append(stripped_line)
+            
+            combat_memo = '\n'.join(filtered_lines)
+            if not combat_memo:
+                combat_memo = "（戦闘用の装備や所持品データがありません）"
+
         grouped_skills = {k: {} for k in groups_def.keys()}
         
         for s_name, s_val in all_skills.items():
@@ -342,7 +428,8 @@ def party():
         party_data.append({
             'inv': inv,
             'grouped_skills': grouped_skills,
-            'max_san': max_san  # 計算結果を画面に渡す
+            'max_san': max_san,
+            'combat_memo': combat_memo
         })
         
     return render_template('party.html', party_data=party_data)
