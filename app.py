@@ -312,6 +312,13 @@ def party():
         all_skills = base_skills.copy()
         all_skills.update(skills_saved)
         
+        for arb in ['製作（任意）', '芸術（任意）', '操縦（任意）', 'ほかの言語（任意）']:
+            prefix = arb.replace('（任意）', '')  # 「製作」「芸術」などの文字だけ抜き出す
+            # その文字から始まる別の技能（製作：護符など）を持っているかチェック
+            if any(k.startswith(prefix) and k != arb for k in all_skills.keys()):
+                if arb in all_skills:
+                    del all_skills[arb]  # 持っていたら空っぽの（任意）を消し飛ばす
+        
         # クトゥルフ神話技能からSAN値の上限を自動計算
         cthulhu = all_skills.get('クトゥルフ神話', 0)
         max_san = 99 - cthulhu
